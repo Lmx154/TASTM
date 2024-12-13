@@ -11,6 +11,8 @@ This project simulates telemetry data for a small rocket, providing realistic da
 
 ## Hardware Requirements
 
+![Board Image](repo/board.jpg)
+
 - A microcontroller with USB CDC support.
 - A breadboard with a button connected to a GPIO pin.
 - CircuitPython-compatible microcontroller.
