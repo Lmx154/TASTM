@@ -4,6 +4,7 @@ import random
 import math
 import board
 import digitalio
+import neopixel  # Import the NeoPixel library
 
 # USB CDC setup
 serial = usb_cdc.data
@@ -12,6 +13,10 @@ serial = usb_cdc.data
 button = digitalio.DigitalInOut(board.D5)  # Replace D5 with your GPIO pin
 button.direction = digitalio.Direction.INPUT
 button.pull = digitalio.Pull.UP  # Use pull-up resistor
+
+# NeoPixel setup
+pixel = neopixel.NeoPixel(board.NEOPIXEL, 1)  # Initialize NeoPixel with 1 LED
+pixel.brightness = 0.3  # Set brightness (0.0 to 1.0)
 
 def time_date_sync():
     """Generates the current time and date in the format: YYYY|MM|DD|Weekday|HH:MM:SS"""
@@ -117,8 +122,10 @@ try:
             if not button_state:  # Button pressed
                 if rocket_sim.state == "standby":
                     rocket_sim.state = "launch"
+                    pixel.fill((0, 255, 0))  # Green for launch mode
                 else:
                     rocket_sim.reset()
+                    pixel.fill((255, 0, 0))  # Red for standby mode
 
         if rocket_sim.state == "standby":
             data = rocket_sim.standby_mode()
@@ -131,3 +138,4 @@ try:
         time.sleep(0.25)
 except KeyboardInterrupt:
     print("Simulation stopped.")
+
