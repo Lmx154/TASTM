@@ -1,4 +1,4 @@
-# Rocket Telemetry Simulation
+# Telemetry Acquisition System Testing Module
 
 This project simulates telemetry data for a small rocket, providing realistic data for testing TAS-GUI. It includes two modes: **standby mode**, simulating the rocket on a landing pad, and **launch mode**, simulating a rocket launch and ascent.
 
