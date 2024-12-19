@@ -1,47 +1,58 @@
 # Telemetry Acquisition System Testing Module
 
-This project simulates telemetry data for a small rocket, providing realistic data for testing TAS-GUI. It includes two modes: **standby mode**, simulating the rocket on a landing pad, and **launch mode**, simulating a rocket launch and ascent. The simulation can be customized with different scenarios.
+This project simulates telemetry data for a small rocket, providing realistic data for testing TAS-GUI or similar telemetry visualization tools. It includes two modes: **standby mode**, simulating the rocket resting on a landing pad, and **launch mode**, simulating a rocket launch and ascent. The simulation supports customizable environmental scenarios, each affecting the rocket's performance and sensor readings.
 
 ## Features
 
-- **Real-time telemetry data:** Outputs data such as acceleration, altitude, pressure, temperature, and speed.
-- **Standby Mode:** Simulates the rocket on a landing pad.
-- **Launch Mode:** Simulates a 20 kg rocket during launch, including environmental effects.
-- **Button-controlled state switching:** A physical button toggles between standby and launch modes.
-- **Scenario-based simulation:** Customize the simulation environment with predefined scenarios like "sunny_texas" and "cold_maine".
+- **Real-time telemetry data:** Outputs data such as acceleration, altitude, pressure, temperature, and speed at a fixed simulation timestep.
+- **Standby Mode:** Simulates the rocket on a landing pad with static (or minimal) variations in telemetry data.
+- **Launch Mode:** Simulates a 20 kg rocket during launch, including gravitational, thrust, and drag forces, as well as changing environmental conditions with increasing altitude.
+- **Button-Controlled State Switching:** A physical button toggles between standby and launch modes.
+- **Scenario-Based Simulation:** Customize the simulation environment with predefined scenarios:
+    - **"sunny_texas":** Hotter, drier conditions with slightly reduced drag.
+    - **"cold_maine":** Colder, more humid conditions with increased drag, making ascent more challenging.
+- **Adjustable Parameters:** Easily change rocket parameters (e.g., mass, thrust) or simulation aspects (e.g., delta_time) in the code to fine-tune the behavior.
+
+## How the Simulation Works
+
+- **Fixed Simulation Step (delta_time):** Each loop iteration simulates a fixed amount of "virtual" time (e.g., 0.25 seconds). The `time.sleep()` call in the code only controls how frequently data is sent over USB in real-time and does not affect the rocket's simulated speed or progression.
+- **Environmental Factors:** Pressure, temperature, and humidity are computed based on altitude and scenario conditions. Each scenario modifies baseline environmental conditions, influencing drag and rocket performance.
+- **Sensor Simulation:** Acceleration, gyroscopic, and IMU temperature readings are approximated with random variations to mimic real sensor noise and environmental turbulence.
 
 ## Hardware Requirements
 
 ![Board Image](repo/board.jpg)
 
-- A microcontroller with USB CDC support.
-- A breadboard with a button connected to a GPIO pin.
-- CircuitPython-compatible microcontroller.
+- A CircuitPython-compatible microcontroller with USB CDC support.
+- A breadboard with a momentary push button connected to a GPIO pin.
+- Onboard NeoPixel (or external NeoPixel) for state indication (optional but supported).
 
 ## Software Requirements
 
 - CircuitPython installed on the microcontroller.
-- Libraries: `usb_cdc`, `digitalio`, `board`, `neopixel`.
+- Required libraries included on the device: `usb_cdc`, `digitalio`, `board`, `neopixel`, `random`, `math`, `time`.
 
 ## Wiring Instructions
 
 1. Connect a button to the microcontroller GPIO pin `D5` (or adjust in the code).
+2. Ensure the correct orientation and pull-up configuration in the code (`button.pull = digitalio.Pull.UP`).
 
 ## Installation
 
-1. Copy the `code.py` and `boot.py` files onto the microcontroller.
-2. Ensure the required CircuitPython libraries are present on the device.
+1. Copy the `code.py` (and optionally `boot.py`) files onto the microcontroller’s CIRCUITPY drive.
+2. Ensure the required CircuitPython libraries are present in the `lib` folder on the device.
 3. Connect the device to your computer via USB.
 
 ## Usage
 
 1. Connect the microcontroller to a USB port.
-2. Open a serial terminal to observe telemetry data.
-3. Press the button to toggle between **standby** and **launch** modes.
-4. Modify the `simulation_scenario` variable in `code.py` to switch between different scenarios (e.g., "sunny_texas" or "cold_maine").
+2. Open a serial terminal on your computer (e.g., screen, PuTTY) to observe the telemetry data.
+3. By default, the device starts in standby mode (rocket on the pad).
+4. Press the button to toggle between **standby** and **launch** modes.
+5. To change scenarios, edit the `simulation_scenario` variable in `code.py` (e.g., set `simulation_scenario = "cold_maine"`).
+6. Observe how different scenarios and modes influence the telemetry data output.
 
 ## Telemetry Data Table
-
 
 | Value in Data String | Mapped Variable   | Description                                   |
 |----------------------|-------------------|-----------------------------------------------|
@@ -63,7 +74,6 @@ This project simulates telemetry data for a small rocket, providing realistic da
 | `0.16`               | `gps_speed`       | GPS ground speed (m/s)                        |
 | `68.00`              | `gps_altitude`    | GPS altitude (m)                              |
 | `8`                  | `gps_satellites`  | Number of GPS satellites in use               |
-
 
 ## Telemetry Data Format
 
@@ -96,23 +106,22 @@ Snr: 7.87
 ### Main Components
 
 1. **`RocketSimulation` Class:**
-   - Handles rocket state, including speed, altitude, and environmental factors.
-   - Includes methods for standby and launch simulations.
-   - Supports scenario-based simulation with predefined conditions.
+   - Manages rocket state (speed, altitude, mass, thrust, gravity, and drag).
+   - Integrates scenario conditions affecting temperature, humidity, and drag.
+   - Provides methods for standby and launch simulation.
 
-2. **`update_speed`, `update_altitude`, `update_environmental_factors` Functions:**
-   - Calculates speed, altitude, and environmental parameters dynamically based on the rocket's state.
+2. **Environment and Sensors:**
+   - `update_environmental_factors()` calculates pressure, temperature, and humidity based on altitude and scenario.
+   - `generate_data()` simulates IMU (accelerometer, gyroscope), BME280 (temperature, pressure, humidity), and GPS readings.
 
 3. **Button Integration:**
-   - Toggles the rocket's state between standby and launch using a button input.
+   - Toggles rocket state between standby and launch when pressed.
 
 4. **NeoPixel Integration:**
-   - Indicates the current state with different colors (green for standby, red for launch).
+   - Indicates the rocket's current state (green for standby, red for launch).
 
 ## Customization
 
-- Adjust rocket parameters (e.g., mass, thrust) by modifying the `RocketSimulation` class.
-- Change the button GPIO pin in the `button = digitalio.DigitalInOut(board.D5)` line.
-- Modify the `simulation_scenario` variable to switch between different scenarios (e.g., "sunny_texas" or "cold_maine").
-
-
+- Change the `simulation_scenario` variable in `code.py` to switch between "sunny_texas" and "cold_maine".
+- Adjust `mass`, `thrust`, or `drag_coefficient` in the `RocketSimulation` class to simulate different rocket configurations.
+- Modify `delta_time` to change the simulation timestep and observe the effect on altitude and speed calculations.
