@@ -10,13 +10,22 @@ import neopixel
 serial = usb_cdc.data
 
 # Button setup
-button = digitalio.DigitalInOut(board.D5)  # Replace D5 with your GPIO pin
+# Replace D5 with your GPIO pin
+# button = digitalio.DigitalInOut(board.D5) # Adafruit feather rp2350
+button = digitalio.DigitalInOut(board.GP5) # RP Pi Pico 2 RP2350
 button.direction = digitalio.Direction.INPUT
 button.pull = digitalio.Pull.UP  # Use pull-up resistor
 
-# NeoPixel setup
-pixel = neopixel.NeoPixel(board.NEOPIXEL, 1)  # Initialize NeoPixel with 1 LED
-pixel.brightness = 0.2  # Set brightness (0.0 to 1.0)
+
+#pixel = neopixel.NeoPixel(board.NEOPIXEL, 1)# Adafruit feather rp2350 NEOPIXEL Setup
+#pixel.brightness = 0.2  # Set brightness (0.0 to 1.0)
+# RP Pi Pico 2 RP2350 NEOPIXEL Setup
+# --------------------------------------
+PIXEL_PIN = board.GP0 
+NUM_PIXELS = 8         
+BRIGHTNESS = 0.5      
+pixel = neopixel.NeoPixel(PIXEL_PIN, NUM_PIXELS, brightness=BRIGHTNESS, auto_write=False)
+# ---------------------------------------
 
 def time_date_sync():
     """Generates the current time and date in the format: YYYY/MM/DD (Weekday) HH:MM:SS"""
@@ -223,10 +232,12 @@ try:
                 if rocket_sim.state == "standby":
                     rocket_sim.state = "launch"
                     pixel.fill((255, 0, 0))  # Red for running state
+                    pixel.show()
                 else:
                     rocket_sim.reset()
                     pixel.fill((0, 255, 0))  # Green for standby state
-
+                    pixel.show()
+                    
         if rocket_sim.state == "standby":
             data = rocket_sim.standby_mode()
         else:
@@ -245,3 +256,4 @@ try:
 
 except KeyboardInterrupt:
     print("Simulation stopped.")
+
