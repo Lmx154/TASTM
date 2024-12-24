@@ -228,7 +228,7 @@ try:
         if usb_cdc.console:
             usb_cdc.console.write(formatted_message.encode("utf-8"))
 
-        time.sleep(0.25)
+        time.sleep(0.01)
 
 except KeyboardInterrupt:
     print("Simulation stopped.")
