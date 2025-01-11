@@ -92,15 +92,6 @@ Data is output in the following format:
 
 ### Example Output
 
-**Standby Mode:**
-```
-$Message length: 115
-Message: [2024/12/19 (Thursday) 13:06:42] 0.0,0.0,0.0,0.0,0.0,0.0,30.57,35.0,1013.25,0.0,20.0,1,2,32.9394,-106.922,0.0,0.0,8
-RSSI: -97
-Snr: 7.39
-```
-
-**Launch Mode:**
 ```
 $Message length: 130
 Message: [2024/12/19 (Thursday) 13:00:02] 15.1,-0.02,-0.4,82.33,-65.0,72.93,31.17,7.52,616.2,4003.17,0,1,2,32.9394,-106.922,82.16,4227.45,8
