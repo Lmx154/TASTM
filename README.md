@@ -1,17 +1,16 @@
 # Telemetry Acquisition System Testing Module
 
-This project simulates telemetry data for a small rocket, providing realistic data for testing TAS-GUI or similar telemetry visualization tools. It includes two modes: **standby mode**, simulating the rocket resting on a landing pad, and **launch mode**, simulating a rocket launch and ascent. The simulation supports customizable environmental scenarios, each affecting the rocket's performance and sensor readings.
+This project simulates telemetry data for a small rocket, providing realistic data for testing TAS-GUI or similar telemetry visualization tools. The simulation supports customizable environmental scenarios, each affecting the rocket's performance and sensor readings.
 
 ## Features
 
 - **Real-time telemetry data:** Outputs data such as acceleration, altitude, pressure, temperature, and speed at a fixed simulation timestep.
-- **Standby Mode:** Simulates the rocket on a landing pad with static (or minimal) variations in telemetry data.
 - **Launch Mode:** Simulates a 20 kg rocket during launch, including gravitational, thrust, and drag forces, as well as changing environmental conditions with increasing altitude.
-- **Button-Controlled State Switching:** A physical button toggles between standby and launch modes.
 - **Scenario-Based Simulation:** Customize the simulation environment with predefined scenarios:
     - **"sunny_texas":** Hotter, drier conditions with slightly reduced drag.
     - **"cold_maine":** Colder, more humid conditions with increased drag, making ascent more challenging.
 - **Adjustable Parameters:** Easily change rocket parameters (e.g., mass, thrust) or simulation aspects (e.g., delta_time) in the code to fine-tune the behavior.
+- **Real-Time Clock Integration:** Uses DS3231 RTC module for accurate timestamp generation in telemetry data.
 
 ## How the Simulation Works
 
@@ -24,33 +23,38 @@ This project simulates telemetry data for a small rocket, providing realistic da
 ![Board Image](repo/board.jpg)
 
 - A CircuitPython-compatible microcontroller with USB CDC support.
-- A breadboard with a momentary push button connected to a GPIO pin.
-- Onboard NeoPixel (or external NeoPixel) for state indication (optional but supported).
+- DS3231 Real-Time Clock module connected via I2C (SCL: GP5, SDA: GP4 for RP2040)
 
 ## Software Requirements
 
 - CircuitPython installed on the microcontroller.
-- Required libraries included on the device: `usb_cdc`, `digitalio`, `board`, `neopixel`, `random`, `math`, `time`.
-
-## Wiring Instructions
-
-1. Connect a button to the microcontroller GPIO pin `D5` (or adjust in the code).
-2. Ensure the correct orientation and pull-up configuration in the code (`button.pull = digitalio.Pull.UP`).
+- Required libraries included on the device: 
+  - `usb_cdc`
+  - `board`
+  - `random`
+  - `math`
+  - `time`
+  - `busio`
+  - `adafruit_ds3231`
 
 ## Installation
 
 1. Copy the `code.py` (and optionally `boot.py`) files onto the microcontroller’s CIRCUITPY drive.
 2. Ensure the required CircuitPython libraries are present in the `lib` folder on the device.
-3. Connect the device to your computer via USB.
+3. Connect the DS3231 module to the appropriate I2C pins (default: SCL=GP5, SDA=GP4).
+4. Connect the device to your computer via USB.
 
 ## Usage
 
 1. Connect the microcontroller to a USB port.
 2. Open a serial terminal on your computer (e.g., screen, PuTTY) to observe the telemetry data.
-3. By default, the device starts in standby mode (rocket on the pad).
-4. Press the button to toggle between **standby** and **launch** modes.
-5. To change scenarios, edit the `simulation_scenario` variable in `code.py` (e.g., set `simulation_scenario = "cold_maine"`).
-6. Observe how different scenarios and modes influence the telemetry data output.
+3. The simulation will automatically start and run continuously.
+4. To change scenarios, edit the `simulation_scenario` variable in `code.py` (e.g., set `simulation_scenario = "cold_maine"`).
+5. Observe how different scenarios influence the telemetry data output.
+
+## Time Synchronization
+
+The system automatically synchronizes with the DS3231 RTC module on startup. Each telemetry message includes an accurate timestamp in the format:
 
 ## Telemetry Data Table
 
@@ -62,6 +66,9 @@ This project simulates telemetry data for a small rocket, providing realistic da
 | `14.00`              | `gyro_x`          | IMU X-axis angular velocity (°/s)             |
 | `16.00`              | `gyro_y`          | IMU Y-axis angular velocity (°/s)             |
 | `-96.00`             | `gyro_z`          | IMU Z-axis angular velocity (°/s)             |
+| `14.00`              | `gyro_x`          | IMU X-axis accumulated angle (°)              |
+| `16.00`              | `gyro_y`          | IMU Y-axis accumulated angle (°)              |
+| `-96.00`             | `gyro_z`          | IMU Z-axis accumulated angle (°)              |
 | `31.25`              | `imu_temp`        | IMU internal temperature (°C)                 |
 | `33.56`              | `bme_temp`        | BME280 temperature reading (°C)               |
 | `1009.91`            | `bme_pressure`    | BME280 atmospheric pressure (hPa)             |
@@ -108,17 +115,11 @@ Snr: 7.87
 1. **`RocketSimulation` Class:**
    - Manages rocket state (speed, altitude, mass, thrust, gravity, and drag).
    - Integrates scenario conditions affecting temperature, humidity, and drag.
-   - Provides methods for standby and launch simulation.
+   - Provides methods for launch simulation.
 
 2. **Environment and Sensors:**
    - `update_environmental_factors()` calculates pressure, temperature, and humidity based on altitude and scenario.
    - `generate_data()` simulates IMU (accelerometer, gyroscope), BME280 (temperature, pressure, humidity), and GPS readings.
-
-3. **Button Integration:**
-   - Toggles rocket state between standby and launch when pressed.
-
-4. **NeoPixel Integration:**
-   - Indicates the rocket's current state (green for standby, red for launch).
 
 ## Customization
 
